@@ -30,7 +30,7 @@ The parts that need real work:
 | SoC | Snapdragon 8 Gen 3 (SM8650) | QCS6490 (SC7280 family, "kodiak") |
 | CPU | 1×Cortex-X4 + 5×A720 + 2×A520 (Armv9) | 1×A78 @2.7 GHz + 3×A78 @2.4 GHz + 4×A55 @1.96 GHz (Armv8.2) |
 | GPU | Adreno 750 | Adreno 643 (812 MHz stock, 900 MHz exists in the upstream OPP table for some bins) |
-| RAM | 16 GB LPDDR5X | 4–16 GB LPDDR5 (buy 12 or 16 GB) |
+| RAM | 16 GB LPDDR5X | 4–16 GB LPDDR5 (target: 8 GB; see [MEMORY.md](MEMORY.md)) |
 | Storage | UFS | M.2 M-key 2230 NVMe (PCIe 3.0 x2), UFS module, eMMC, microSD |
 | Boot | Qualcomm XBL → U-Boot → GRUB, slot control via `splctl` | Qualcomm XBL → **UEFI (EDK2) on SPI NOR** → any EFI loader |
 | Display | Internal panels (VR) | HDMI 2.0 via DP→HDMI bridge (RA620) |
@@ -180,7 +180,7 @@ The AIC8800 firmware comes from Radxa's packages.
 
 Recommended hardware:
 
-- 12 or 16 GB Q6A
+- an 8 GB Q6A or larger (the system is budgeted for 8 GB, see [MEMORY.md](MEMORY.md))
 - a 2230 PCIe 3.0 NVMe (DRAM-less is fine; x2 lanes cap at about 2 GB/s anyway)
 - the official heatsink plus a fan
 - a 30 W+ USB-C PD supply

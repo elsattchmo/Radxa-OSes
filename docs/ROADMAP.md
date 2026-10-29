@@ -42,8 +42,9 @@ This replaces the phase order in [PLAN.md](PLAN.md) §8. The research in PLAN.md
    - raised thermal limits
    - Silent/Balanced/Performance/Overclock profiles in the QAM
    - per-game profiles
-7. **Install to M.2 NVMe**, with A/B updates and automatic rollback, triggered from Steam's own "Check for updates".
-8. **An automated update pipeline** for four kinds of upstream: Valve OS builds (including Valve's Mesa and gamescope), Mesa/Turnip (stable and main), the kernel, and firmware. It includes hardware-in-the-loop testing and release channels ([UPDATES.md](UPDATES.md)).
+7. **Light on memory:** Game Mode idle at or below 1.3 GB used on the 8 GB board, at least 6 GB left for the game, and Lepton/Desktop never resident during a game by default. The budget is enforced in CI ([MEMORY.md](MEMORY.md)).
+8. **Install to M.2 NVMe**, with A/B updates and automatic rollback, triggered from Steam's own "Check for updates".
+9. **An automated update pipeline** for four kinds of upstream: Valve OS builds (including Valve's Mesa and gamescope), Mesa/Turnip (stable and main), the kernel, and firmware. It includes hardware-in-the-loop testing and release channels ([UPDATES.md](UPDATES.md)).
 
 ### Stretch goal (researched in Phase 0, shipped as soon as possible)
 
@@ -68,7 +69,7 @@ This replaces the phase order in [PLAN.md](PLAN.md) §8. The research in PLAN.md
 
 | Item | Why |
 |---|---|
-| Q6A **12 or 16 GB** | Frame userspace + FEX + Proton need the RAM |
+| Q6A: the **8 GB** board you have is the target | Everything is budgeted for 8 GB ([MEMORY.md](MEMORY.md)). 12/16 GB boards just get more headroom |
 | 2230 M.2 NVMe (PCIe 3.0) | Target install disk |
 | Heatsink + fan | Sustained GPU clocks |
 | **3.3 V USB-UART adapter** | Serial console: essential when HDMI or gamescope is black |
@@ -92,6 +93,7 @@ This decides whether the project goes ahead, so it comes before any image buildi
    - **Fan:** what the cooling kit connects to, and whether a PWM line is reachable
    - **Audio:** headset jack and HDMI audio with the AudioReach topology
    - **Bluetooth:** pairing a controller on the AIC8800
+   - **Memory:** baseline of Valve's image in Game Mode (`ps_mem`/`smem`), per service, before and after masking the VR stack ([MEMORY.md](MEMORY.md))
 8. Write the results to `docs/spike-results.md`. Decide: stock gamescope or patched? Is Valve's Mesa OK on the A643, or do we need our own build from day one?
 
 **Go** if Game Mode's UI shows on the TV with either binary. **No-go** only if `drm/msm` can't drive the HDMI bridge from gamescope at all. That would be a kernel bug to fix before anything else, not a dead end.

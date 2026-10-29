@@ -16,6 +16,7 @@ Status: research and planning.
 - [docs/ROADMAP.md](docs/ROADMAP.md): scope and what to do first
 - [docs/GAMESCOPE.md](docs/GAMESCOPE.md): Game Mode on HDMI, the critical path
 - [docs/UPDATES.md](docs/UPDATES.md): automated updates for Valve builds, GPU drivers, kernel and firmware
+- [docs/MEMORY.md](docs/MEMORY.md): keeping the system light on an 8 GB board
 - [docs/PERFORMANCE.md](docs/PERFORMANCE.md): upscaling, frame generation, VRR, overclocking, thermals and profiles
 - [docs/PLAN.md](docs/PLAN.md): the original feasibility study and architecture
 

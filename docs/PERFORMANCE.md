@@ -89,7 +89,7 @@ Ask Radxa directly for the RA620's VRR/ALLM capabilities in parallel. It's their
   - Game process tree → the **A78 cores** (2.7 + 3×2.4 GHz) via a cpuset on the game slice.
   - Steam client, downloads, shader compilation in the background, and IRQs → the **A55 cores**.
   - `uclamp` boost for the game's main/render threads.
-- **Memory.** zram swap (Valve's `holo-zram-swap`), transparent huge pages for games, and Steam downloads throttled while a game runs. RAM is shared with the GPU, so the 12/16 GB models matter.
+- **Memory.** The target is the 8 GB board; the full budget is in [MEMORY.md](MEMORY.md): zram, VRAM reporting limits, OOM order, a CI memory gate. Transparent huge pages for games; Steam downloads throttled while a game runs.
 - **Storage.** NVMe for games and shader cache. The PCIe 3.0 x2 link caps at about 2 GB/s, which is plenty.
 
 ## 7. Overclocking (v1)

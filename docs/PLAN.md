@@ -166,7 +166,7 @@ The AIC8800 firmware comes from Radxa's packages.
 
 ## 5. Boot and storage (M.2 NVMe)
 
-1. Flash the current Radxa SPI firmware (≥ the 2025-10-13 release, which brought fixed boot order and the corrected embedded DTB) using `edl-ng` in EDL mode. This is a one-time step.
+1. Flash the current Radxa SPI firmware (`wp_260916` as of 2026-10-28; details and the RAM trade-off in [FIRMWARE.md](FIRMWARE.md)) using `edl-ng` in EDL mode. This is a one-time step.
 2. Default UEFI order is USB > SD > NVMe > eMMC > UFS. Leave it as is: with nothing in USB/SD it boots NVMe, and plugging in a USB stick gives a recovery path.
 3. **ESP loader:** use systemd-boot with [boot counting](https://systemd.io/AUTOMATIC_BOOT_ASSESSMENT/). Entries look like `steamos-A+3.conf` / `steamos-B+3.conf`, and `systemd-bless-boot` marks a slot good once the session is up. We pass our own DTB with `devicetree` in the entry instead of relying on the UEFI-patched one. Valve's GRUB package is an alternative if we want to stay closer to stock.
 4. **Installer:** a small live USB image (Armbian minimal + our script). It:

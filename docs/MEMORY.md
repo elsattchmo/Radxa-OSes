@@ -8,7 +8,7 @@ On this SoC, RAM is also the GPU's memory. Everything the OS keeps resident is t
 
 | Consumer | Budget (8 GB board) | Notes |
 |---|---|---|
-| Firmware and co-processor reservations | ~0.2 GB | Measured from the device tree: the Q6A reserves ~171 MiB, plus a few MiB in `kodiak.dtsi`. Radxa has already removed the 246 MiB modem region. Confirm with `MemTotal` in Phase 0. |
+| Firmware and co-processor reservations | **~0.45 GB** on current firmware | The latest `wp` firmware's memory map reserves ~464 MiB, against ~142 MiB on the older Linux-only firmware. Most of it is sized for a modem and Wi-Fi co-processor the Q6A doesn't have ([FIRMWARE.md §2](FIRMWARE.md#2-the-memory-cost-of-the-wp-firmware)). We're asking Radxa for a trimmed map. Confirm with `MemTotal` in Phase 0. |
 | **OS + Game Mode idle** | **≤ 1.3 GB used** (stretch: ≤ 1.0 GB) | Steam client + web helper, gamescope + 2 Xwayland servers, PipeWire, NetworkManager, BlueZ, InputPlumber, systemd/journald. Excludes reclaimable page cache. |
 | **Game + its GPU allocations** | **≥ 6 GB** | What the user actually bought the board for |
 | Desktop Mode, Lepton (Android), browsers | 0 while a game runs | Separate session or started on demand; never resident during a game by default |

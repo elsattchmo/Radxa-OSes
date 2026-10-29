@@ -55,7 +55,7 @@ From the SC7280 DPU catalogue (`drivers/gpu/drm/msm/disp/dpu1/catalog/dpu_7_2_sc
 | Plane width | 2400 px per pipe, 2560 px per mixer | 1080p/1440p: one pipe per plane. **4K needs two pipes per plane** ("virtual planes", now on by default in `drm/msm`) plus 3D merge, which halves the plane budget. |
 | Colour pipeline | DSPP with a 3×3 colour matrix (PCC); no per-plane degamma/shaper/3D LUT | AMD-only colour properties don't apply. Gamescope does colour work (night mode, colour sliders) in its Vulkan composite path, as it does on Intel. |
 | HDR | No HDR metadata path in mainline `msm` DP; RA620 unknown | **No HDR.** The Frame's flat mode has no HDR either, so this isn't a parity loss. |
-| VRR | No adaptive-sync in mainline `msm` DP | **No VRR.** Same: not a Frame feature. |
+| VRR | No adaptive-sync in mainline `msm` DP; bridge support unknown | Gamescope's VRR support is ready, but VRR needs bridge support plus kernel work. It's a **stretch goal** with a Phase 0 pass/fail check ([PERFORMANCE.md §3](PERFORMANCE.md#vrr-stretch-goal-a-big-win-if-the-hardware-allows-it)). Fallback: 120 Hz HDMI modes with even frame caps. |
 | Tearing/async flips | `DRM_CAP_ATOMIC_ASYNC_PAGE_FLIP` probably not exposed (verify) | The QAM "allow tearing" toggle will likely be greyed out. |
 | Compressed scanout (UBWC) | DPU can scan out UBWC buffers that Turnip produces | Saves a lot of memory bandwidth on a bandwidth-starved SoC. The handheld ports saw corruption and added a "linear only" switch; **must be tested** here (see G3). |
 | EDID / orientation | Real EDID over HDMI, landscape | Most of the handheld ports' gamescope patches (EDID-less DSI panels, rotation, dual screens) **aren't needed**. |

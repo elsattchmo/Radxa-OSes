@@ -14,7 +14,7 @@ The parts that need real work:
 
 - Our own kernel. Valve's kernel only covers Frame hardware.
 - An update pipeline that follows Valve's releases.
-- Switching the session from "headset" to "TV/desktop".
+- **Gamescope.** On the Frame it never drives a display: it runs with `--backend openvr` and renders into SteamVR overlays. We need its DRM/KMS backend driving HDMI on Qualcomm's display driver, which Valve has never tested. This is the critical path; see [GAMESCOPE.md](GAMESCOPE.md).
 - Overclocking, which is mostly limited to the GPU (see section 7).
 
 **Expect lower performance than a Frame.** The QCS6490 is a mid-range 2021-class chip. Its GPU has roughly a quarter to a third of the Frame's Adreno 750 throughput, and the CPU is 4×A78 + 4×A55 against the Frame's X4/A720 cores. x86 games via FEX + Proton will be limited to lighter and older titles at 720p–1080p. Native ARM64 games, Android apps (Lepton), streaming and Desktop Mode will run well.
@@ -64,8 +64,8 @@ The bundle (about 2 MB) contains `manifest.raucm` (`compatible=steamos-aarch64`,
 
 | Frame feature | On Q6A | Notes |
 |---|---|---|
-| Game Mode (gamescope + Steam Big Picture UI) | ✅ planned | Output over HDMI at 1080p/1440p/4K, using gamescope FSR/NIS upscaling to render below 4K |
-| Desktop Mode (KDE Plasma) | ✅ planned | Stock Valve packages |
+| Game Mode (gamescope + Steam gamepad UI, QAM) | ✅ planned | Gamescope switched from the VR backend to DRM/KMS on HDMI. 1080p output by default, 1440p/4K optional; SGSR/FSR/NIS upscaling. No HDR/VRR (the Frame has neither in flat mode). See [GAMESCOPE.md](GAMESCOPE.md) |
+| Desktop Mode (KDE Plasma) | ✅ planned | On the Frame it's nested in gamescope as a VR overlay. Here: native KWin Wayland on KMS, as on the Deck |
 | Native arm64 Steam client | ✅ | Comes with the image |
 | x86/x64 Linux and Windows games (FEX + Proton ARM64EC) | ✅ planned | Works, but slow (see section 9) |
 | Android apps and games (Lepton) | ✅ planned | Needs the Android Mesa slice to support A643 (verified in Phase 0) |
@@ -111,7 +111,7 @@ The key decision is to **keep Valve's rootfs unmodified and put everything Q6A-s
    - a RAUC bootloader handler
    - systemd presets
 3. **`/etc` drop-ins**, which persist in Valve's `/etc` overlay. These mask the VR/Frame units, switch the default session to plain gamescope-session, and override `/etc/rauc/system.conf`.
-4. **Any Valve binary we have to replace**, ideally none. If one is needed (e.g. a patched gamescope), it goes in the sysext rather than into the rootfs.
+4. **Any Valve binary we have to replace**, ideally none. If one is needed (e.g. a patched gamescope), it goes in the sysext rather than into the rootfs. A patched gamescope is rebuilt by CI for every Valve release from Valve's exact commit (see [GAMESCOPE.md §6](GAMESCOPE.md#6-which-gamescope-binary-we-ship)).
 
 Why this design:
 
@@ -255,8 +255,11 @@ The phases are sequential. Each has an exit criterion; don't start the next unti
 | 0.4 | `systemd-nspawn` into Valve's rootfs on the Armbian kernel, bind `/dev/dri`; run Valve's `vulkaninfo`, `FEXInterpreter` on an x86_64 test binary, the Steam client's `--version` | No SIGILL (no Armv9-only code); Valve's Turnip drives A643 |
 | 0.5 | Read Valve's `rauc` `system.conf`, `atomupd` config, RAUC bundle hooks, `kernelsetup.sh`, `splctl` call sites | Written list of everything Frame-specific that runs during an update |
 | 0.6 | Same for every Frame-only systemd unit (start from the handheld ports' mask list) | Mask list v0 |
+| 0.7 | **Gamescope DRM spike:** Valve's gamescope binary with `--backend drm` on HDMI, then the full Steam gamepad UI (tests G0–G4 in [GAMESCOPE.md](GAMESCOPE.md#7-acceptance-tests)) | Game Mode UI on the TV; plane/modifier behaviour logged |
 
-**Go/no-go:** if 0.4 shows Valve's Mesa doesn't handle A643, build our own four Mesa slices (aarch64, x86_64, i386, android) from Valve's `deckard-mesa` tree. The handheld project's `build-mesa.sh` shows how. This adds a slow-tier component but doesn't stop the project.
+**Go/no-go:** gamescope (0.7) is the hard gate. If its DRM backend can't light up HDMI on `msm`, nothing else matters until it does; fixes go in the kernel or a gamescope patch queue.
+
+If 0.4 shows Valve's Mesa doesn't handle A643, build our own four Mesa slices (aarch64, x86_64, i386, android) from Valve's `deckard-mesa` tree. The handheld project's `build-mesa.sh` shows how. This adds a slow-tier component but doesn't stop the project.
 
 ### Phase 1: Kernel and first boot (2–3 weeks)
 
@@ -264,9 +267,15 @@ The phases are sequential. Each has an exit criterion; don't start the next unti
 - Image builder (`build/make-image.sh`): GPT layout from section 3, Valve rootfs in both slots, systemd-boot, efi-A/B, sysext v0
 - **Exit:** boots from NVMe to a Valve-rootfs text console over HDMI, with network up
 
-### Phase 2: Game Mode and Desktop Mode (2–4 weeks)
+### Phase 2: Game Mode and Desktop Mode (3–5 weeks)
 
-- Mask VR/Frame units. Switch the default session to gamescope-session at the HDMI mode with an output resolution selector. Make the Desktop Mode switch and return to Game Mode work.
+This is the gamescope phase. The full design is in [GAMESCOPE.md](GAMESCOPE.md).
+
+- Mask VR/Frame units. Decouple `gamescope-session` from SteamVR and run our DRM session script: HDMI output, resolution/refresh setting, SGSR default, no forced composition.
+- Hand the gamescope environment to `steam.service` (refresh/frame-limit UI, mangoapp).
+- Desktop Mode on native KWin Wayland; the Game Mode ↔ Desktop switch through `steamos-session-select`.
+- TV behaviour: hotplug, TV power cycles, headless boot for Remote Play.
+- Pass gamescope acceptance tests G0–G10, including direct-scanout and frame-pacing measurements.
 - Audio: HDMI (DP audio) UCM profile, USB/BT audio through PipeWire
 - Input: InputPlumber, `hid-steam`, Bluetooth pairing from the Steam UI, power button (`pmic_pwrkey`) → steamos-powerbuttond
 - **Exit:** login to Steam, install and play a native ARM64 game and a Proton/FEX game, switch to Desktop and back
@@ -310,6 +319,8 @@ Rough total for one experienced developer: **3–4 months** of part-time work to
 | Valve's update path hard-depends on Frame partitions or `splctl` | Medium | Med | Fallback re-signed bundle pipeline (6.3) |
 | Valve changes the CDN layout, signing or channel names | Medium over time | Med | CI watcher alerts; installer pins CA + URL patterns in one config |
 | Valve stops publishing the vr channel publicly | Low | High | Keep the last good build mirrored privately for personal use |
+| Gamescope DRM backend misbehaves on `msm` (rejected commits, UBWC corruption, scaling flicker) | Medium–high | **High** | Phase 0 spike first; linear-scanout and forced-composite fallbacks; small upstreamed patch queue rebuilt per Valve release ([GAMESCOPE.md §8](GAMESCOPE.md#8-risks-specific-to-gamescope)) |
+| Gamescope composite cost too high on A643 | Medium | Med | 1080p default output, direct scanout where possible, SGSR; measured with Perfetto |
 | HDMI/DP regressions on new kernels | Medium | Med | Pin kernel per release; carry Armbian/Radxa fixes |
 | Suspend unreliable | High | Low | Freeze-based standby |
 | Thermal throttling without active cooling | High | Med | Require fan for Performance/Overclock profiles |
@@ -325,6 +336,7 @@ docs/                  this plan, hardware notes, install guide
 kernel/                patches/, q6a.config, build.sh (Valve 7.2 + Armbian qcs6490 patches)
 device-layer/          sysext tree: firmware, modules (built), UCM, InputPlumber, units, rauc handler
   etc/                 masks, session defaults, rauc system.conf override
+gamescope/             session script, systemd drop-ins, patches/ (only if needed), build-in-rootfs.sh
 tuning/                q6a-tuned daemon, DT overlays (opp/thermal), decky-q6a-tuning plugin
 installer/             live-USB image + install.sh (partition, fetch+verify Valve image, provision)
 build/                 make-image.sh, extract_rootfs.py (from hashtagbasit, GPL-2.0), qemu smoke test

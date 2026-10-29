@@ -9,6 +9,11 @@ Porting SteamOS (the Steam Frame / "deckard" arm64 build) to the Radxa Dragon Q6
 - A/B updates that follow Valve's releases
 - GPU overclock and tuning profiles
 
-Status: research and planning. See [docs/PLAN.md](docs/PLAN.md) for the feasibility study, architecture and phased plan.
+Status: research and planning.
+
+- [docs/ROADMAP.md](docs/ROADMAP.md): scope and what to do first
+- [docs/GAMESCOPE.md](docs/GAMESCOPE.md): Game Mode on HDMI, the critical path
+- [docs/UPDATES.md](docs/UPDATES.md): automated updates for Valve builds, GPU drivers, kernel and firmware
+- [docs/PLAN.md](docs/PLAN.md): the original feasibility study and architecture
 
 This project is unofficial and not affiliated with Valve or Radxa. Valve's SteamOS image is never redistributed here. The installer downloads it from Valve and verifies Valve's signature on your own machine.

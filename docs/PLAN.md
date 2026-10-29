@@ -2,6 +2,8 @@
 
 Status: research and planning, October 2026. Nothing has been built yet.
 
+> **Update:** the scope and phase order have been revised. See [ROADMAP.md](ROADMAP.md) for what to do first and the v1 scope, and [UPDATES.md](UPDATES.md) for the update automation design (Valve, Mesa/Turnip, kernel, firmware), which supersedes §6 below.
+
 ## TL;DR
 
 **Yes, it's feasible.** The pieces needed already exist, though nobody has put them together for this board:
@@ -187,6 +189,8 @@ Recommended hardware:
 
 ## 6. Updates that follow Valve's releases
 
+> Superseded for v1 by [UPDATES.md](UPDATES.md): we ship one tested, signed bundle per Valve build + driver + kernel combination. Direct installs of Valve's bundles (below) move to v2.
+
 ### 6.1 Primary path: install Valve's bundles directly
 
 - We ship an override `/etc/rauc/system.conf`:
@@ -242,6 +246,8 @@ User-facing tuning:
 ---
 
 ## 8. Phased plan
+
+> Replaced by the milestones in [ROADMAP.md](ROADMAP.md). The phase details below still describe the work.
 
 The phases are sequential. Each has an exit criterion; don't start the next until it's met.
 

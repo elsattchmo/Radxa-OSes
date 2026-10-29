@@ -8,7 +8,7 @@ Rule for every item below: **measure on the Q6A before making it a default.** Se
 
 | Technique | Level | Works with | Cost on A643 | Default |
 |---|---|---|---|---|
-| **SGSR 1** (Snapdragon Game Super Resolution + RCAS) | gamescope (`-F sgsr`) | Any game | Low; designed for Adreno | **Yes**, for games rendering below output resolution |
+| **SGSR 1** (Snapdragon Game Super Resolution + RCAS) | gamescope (`-F sgsr`, 3.16.30+; Valve's stable Frame build is still 3.16.28) | Any game | Low; designed for Adreno | **Yes, once available**; FSR 1 until then. For games rendering below output resolution |
 | **FSR 1** | gamescope (`-F fsr`) | Any game | Low–medium | QAM option |
 | **NIS** | gamescope (`-F nis`) | Any game | Low–medium | QAM option |
 | Integer / nearest | gamescope | Pixel-art, 540p→1080p | ~0 | QAM option |

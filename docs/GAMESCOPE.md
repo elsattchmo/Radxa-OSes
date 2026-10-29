@@ -40,7 +40,7 @@ Phase 0 therefore tests **both** Valve's stock binary and their MSM build on the
 
 - **The binary.** Valve's `gamescope` package is upstream `ValveSoftware/gamescope` built with default meson options, so the DRM backend (wlroots + libliftoff + libdisplay-info) is compiled into the Frame image. The Frame-era version also brings:
   - the stand-in connector for headless sessions (`3.16.30`)
-  - the **SGSR** upscaler (`-F sgsr`, Snapdragon Game Super Resolution). It was designed for Adreno and is a good default filter on this GPU.
+  - the **SGSR** upscaler (`-F sgsr`, Snapdragon Game Super Resolution). It was designed for Adreno and is a good default filter on this GPU. **But Valve's current stable Frame build ships gamescope 3.16.28, which predates SGSR** ([VALVE-IMAGE.md](VALVE-IMAGE.md)). Until Valve's build catches up, SGSR means shipping our own gamescope build (§6); FSR is the default otherwise.
 - **Steam integration.** The `--steam` mode atoms give us the Quick Access Menu's frame limiter, scaling filter (FSR/NIS/SGSR/integer), the perf overlay via `mangoapp`, screenshots, and the PipeWire stream used by game recording and by Remote Play when the Q6A is the host.
 - **The x86 WSI layer.** `deckard-gamescope-layer-x86_64` installs gamescope's Vulkan WSI layer into the FEX rootfs, so x86 games running under FEX/Proton present through gamescope properly.
 - **Turnip features gamescope needs**, all present: DRM format modifiers, `VK_EXT_physical_device_drm`, dma-buf import/export, sync-file/timeline semaphores.

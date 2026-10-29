@@ -2,6 +2,8 @@
 
 Status: research and planning, October 2026. Nothing has been built yet.
 
+> **Verified facts about Valve's image** (kernel 6.18 in the current stable build, gamescope 3.16.28, FEX delivered through Steam, the A/B update mechanism, the Frame service list) are in [VALVE-IMAGE.md](VALVE-IMAGE.md). They override assumptions below.
+>
 > **Update:** the scope and phase order have been revised. See [ROADMAP.md](ROADMAP.md) for what to do first and the v1 scope, and [UPDATES.md](UPDATES.md) for the update automation design (Valve, Mesa/Turnip, kernel, firmware), which supersedes §6 below.
 
 ## TL;DR

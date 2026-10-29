@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# One entry point for every test stage. See docs/testing/README.md.
+#
+#   sudo ./q6a-test deps            install the tools the tests need
+#   sudo ./q6a-test stage1          hardware baseline (about 5 minutes)
+#   sudo ./q6a-test stage2          Valve's SteamOS + gamescope on this board (about 30 minutes)
+#   sudo ./q6a-test stage2-cleanup  unmount the Valve image (add --delete to remove the download)
+#
+# Add --auto to any stage to skip all questions.
+set -u
+HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_COMMIT=$(git -C "$HERE" rev-parse --short HEAD 2>/dev/null || echo unknown)
+export REPO_COMMIT
+
+cmd=${1:-help}
+[[ $# -gt 0 ]] && shift
+case $cmd in
+  deps) exec "$HERE/tests/install-deps.sh" "$@" ;;
+  stage1) exec "$HERE/tests/stage1-baseline.sh" "$@" ;;
+  stage2) exec "$HERE/tests/stage2-valve.sh" "$@" ;;
+  stage2-cleanup) exec "$HERE/tests/stage2-valve.sh" --cleanup "$@" ;;
+  *) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//' ;;
+esac

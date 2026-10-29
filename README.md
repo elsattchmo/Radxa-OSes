@@ -11,11 +11,13 @@ Porting SteamOS (the Steam Frame / "deckard" arm64 build) to the Radxa Dragon Q6
 - Upscaling (SGSR/FSR/NIS), frame generation, 120 Hz modes, VRR if the hardware allows
 - GPU overclocking, fan/thermal control and per-game performance profiles
 
-Status: research and planning.
+Status: research and planning. **Board testing starts here: [docs/testing/README.md](docs/testing/README.md)** (staged tests; one command per stage, one report back).
 
 - [docs/ROADMAP.md](docs/ROADMAP.md): scope and what to do first
+- [docs/TEST-PLAN.md](docs/TEST-PLAN.md): test stages and their pass/fail gates
 - [docs/GAMESCOPE.md](docs/GAMESCOPE.md): Game Mode on HDMI, the critical path
 - [docs/UPDATES.md](docs/UPDATES.md): automated updates for Valve builds, GPU drivers, kernel and firmware
+- [docs/VALVE-IMAGE.md](docs/VALVE-IMAGE.md): what's actually inside Valve's Frame image (verified by download)
 - [docs/FIRMWARE.md](docs/FIRMWARE.md): Q6A boot firmware status, the RAM cost of the latest firmware, safe flashing
 - [docs/MEMORY.md](docs/MEMORY.md): keeping the system light on an 8 GB board
 - [docs/PERFORMANCE.md](docs/PERFORMANCE.md): upscaling, frame generation, VRR, overclocking, thermals and profiles

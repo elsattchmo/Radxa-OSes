@@ -79,6 +79,8 @@ This replaces the phase order in [PLAN.md](PLAN.md) §8. The research in PLAN.md
 
 ### Step 2: Gamescope check on real hardware (about 1 week)
 
+> These steps are now scripted: **[testing/README.md](testing/README.md)** (Stage 0 = board prep, Stage 1 = steps 1–2 and 7, Stage 2 = steps 3–6). The gates are in [TEST-PLAN.md](TEST-PLAN.md).
+
 This decides whether the project goes ahead, so it comes before any image building. Each step builds on the previous one:
 
 1. Flash the latest Radxa SPI firmware, **`wp_260916`**, from a host PC in EDL mode ([FIRMWARE.md](FIRMWARE.md)). Record `MemTotal`; that firmware reserves about 320 MiB more than the older Linux-only one. Install **Armbian `qcs6490` edge (mainline 7.2)** to the NVMe.

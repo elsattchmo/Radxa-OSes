@@ -19,6 +19,23 @@ gamescope --backend openvr --vr-session-manager \
 
 On the Q6A, gamescope has to run with **`--backend drm`**: the Steam Deck path, driving HDMI through KMS, with direct scanout and hardware planes. That backend is the same code Valve ships to every Deck, but **Valve has never run it on Qualcomm's display driver** (`drm/msm`, DPU). Turning the headset session into a TV session is mostly gamescope work, which is why it gets its own document.
 
+## 1a. Prior art: who has gamescope on Qualcomm displays already
+
+| Project | Base | Gamescope status | Useful to us |
+|---|---|---|---|
+| **hashtagbasit/SteamOS-ARM-Handhelds** (includes MaSi's SM8550 work) | Valve's Frame image + ROCKNIX-based kernels, SM8250–SM8750 | **Working.** Runs `--backend drm` on `drm/msm` with an "MSM port" of gamescope 3.16.30. An external monitor on USB-C/HDMI takes over Game Mode with HDMI/DP audio, as on a Deck. | **Yes, our starting point.** Session script, SteamVR decoupling drop-ins, the env handoff to `steam.service`, the build-inside-the-Frame-rootfs script, and patches for MSM quirks: a linear-only switch for compressed buffers, a forced composite for scaled layers, compositor rotation, EDID-less refresh tables. GPL-2.0. |
+| **Armada → Nebel** (Ga1dz1) | Fedora bootc, *not* Valve's image; SM4450–SM8750 | External monitors in Game Mode since the 2026-09-07 beta | Confirms the approach works, but most code is now in private repositories |
+| **DroidDeck** | Runs inside Android (PRoot) | Not a KMS compositor setup | No |
+
+**Nobody has done this on the QCS6490 or on any SBC yet.** Every existing port targets a handheld's built-in DSI panel first, with HDMI/DP as a secondary output, and runs on bigger display engines than the SC7280's. What's still ours to solve:
+
+- the RA620 DP→HDMI bridge
+- the one-scaler, 2400 px-per-pipe plane limits, which affect 4K (section 3)
+- whether compressed (UBWC) scanout works on this exact GPU and display pairing
+- tuning the defaults for a TV rather than a panel. Their `--force-composition`, `--generate-drm-mode fixed` and `--adaptive-sync` are panel choices we don't want (section 4).
+
+Phase 0 therefore tests **both** Valve's stock binary and their MSM build on the Q6A. We take whichever passes G0–G4 with fewer patches, and upstream what we can.
+
 ## 2. What we get for free
 
 - **The binary.** Valve's `gamescope` package is upstream `ValveSoftware/gamescope` built with default meson options, so the DRM backend (wlroots + libliftoff + libdisplay-info) is compiled into the Frame image. The Frame-era version also brings:

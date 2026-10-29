@@ -65,7 +65,7 @@ Turnip reports a GPU memory heap based on system RAM. Many PC games pick texture
   | `cvp_mem` | 5 MiB | computer-vision block |
 
   That's about 70 MiB in total. Re-enabling them for AI users is a profile toggle. Never touch the TrustZone/hypervisor regions (`qtee`, `trusted_apps`, `tz_stat`, `tags`, `hyp`), since firmware writes to them.
-- **Small CMA.** The GPU and display both sit behind the IOMMU, so a small CMA area (about 32 MiB) is enough. Verify that video decode (Iris) doesn't need more.
+- **CMA isn't a big cost.** Qualcomm's docs note that idle CMA is reused by the kernel for movable allocations, unlike `no-map` carve-outs. The GPU and display sit behind the IOMMU, so keep CMA modest (about 32–64 MiB) and verify video decode (Iris) is happy with it.
 - **Production kernel config.** Use Valve's non-`hwdebug` config as the base. No kmemleak or other debug allocators; keep only the `tracefs` that mangoapp and steamos-manager need.
 
 ## 7. CPU "lightness" too

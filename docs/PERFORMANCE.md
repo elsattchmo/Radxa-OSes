@@ -35,7 +35,7 @@ Frame generation costs GPU time and adds latency. On the A643 it's most useful f
 
 Without VRR, smoothness comes from **frame caps that divide the refresh rate evenly**:
 
-- **HDMI 120 Hz modes.** Many TVs accept **1080p120** over HDMI 2.0, and 1440p120 fits HDMI 2.0 bandwidth too. At 120 Hz, caps of **30 / 40 / 60 / 120** are all even. **40 fps at 120 Hz** is the sweet spot for this GPU: noticeably smoother than 30, far cheaper than 60. Gamescope gets per-display refresh lists from a Lua display profile built from the TV's EDID, so Steam shows a refresh slider for external screens too.
+- **HDMI 120 Hz modes.** Many TVs accept **1080p120**, and it fits the Q6A's video link (the SoC's DisplayPort output runs on two lanes at HBR3, which Qualcomm rates at 4K 30 fps). 1440p120 and 4K60 exceed that link. At 120 Hz, caps of **30 / 40 / 60 / 120** are all even. **40 fps at 120 Hz** is the sweet spot for this GPU: noticeably smoother than 30, far cheaper than 60. Gamescope gets per-display refresh lists from a Lua display profile built from the TV's EDID, so Steam shows a refresh slider for external screens too.
 - **50 Hz / 48 Hz modes** for PAL-era content and 24 fps video, where the TV offers them.
 - **ALLM (Auto Low Latency Mode)**, to switch the TV into game mode automatically. This depends on the HDMI bridge forwarding the HDMI Forum infoframe; test in Phase 0.
 
@@ -98,7 +98,7 @@ Ask Radxa directly for the RA620's VRR/ALLM capabilities in parallel. It's their
 |---|---|---|
 | **GPU 840 / 900 MHz** | DT overlay enabling the upstream `TURBO` / `TURBO_L1` OPPs for the Q6A's speed bin (from the GPU speed-bin fuse). About +11% over 812 MHz. | Same voltage corners Qualcomm uses for faster bins |
 | **GPU experimental (>900 MHz)** | Optional overlay adding higher steps on the top voltage corner. Only offered after the **built-in stability test** passes on *your* board. | Likely unstable on most chips, since there's no higher voltage corner. Auto-reverts on a GPU hang. |
-| **Memory bandwidth floor** | Performance/OC profiles raise the GPU's DDR bandwidth votes and devfreq floor | Power/heat only |
+| **Memory bandwidth floor** | Performance/OC profiles raise the GPU's DDR bandwidth votes and devfreq floor. They also adjust the CPU OPP tables' L3/DDR votes (`opp-peak-kBps`); Qualcomm documents this static CPU→L3/DDR map and the BWMON governor as the tuning points. | Power/heat only |
 | **CPU sustained clocks** | Performance governor, raised min-frequency floors on the A78 clusters | No clock increase is possible: the 2.7/2.4/1.96 GHz limits are locked in signed firmware |
 
 **Stability test** (`q6a-tuned stress`): vkmark + a Vulkan compute soak + a capture-checked gamescope scene at each candidate clock, for 10–30 minutes.
@@ -107,6 +107,10 @@ Ask Radxa directly for the RA620's VRR/ALLM capabilities in parallel. It's their
 - A clock is only offered if it passes.
 - If a GPU hang happens later in normal use, the next boot drops back to the last stable clock automatically.
 - The boot menu always has a **"Safe (stock clocks)"** entry.
+
+### Research: boot Linux at EL2 instead of under Gunyah
+
+On the QCS6490, Qualcomm's default is to run Linux at EL1 under its **Gunyah** hypervisor, and the Q6A does the same. Qualcomm documents a KVM boot mode for its RB3 Gen 2 board, selected by a different `xbl_config` image (`xbl_config_kvm.elf`), where Linux runs at EL2 with no hypervisor underneath. That might remove some memory-translation overhead and change the memory map. It needs a Radxa-built firmware variant, so it's a question for Radxa plus a benchmark, not a v1 item.
 
 ## 8. Thermal control
 

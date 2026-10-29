@@ -26,9 +26,9 @@ A scheduled GitHub Actions workflow (`watch.yml`, hourly) polls each source. Whe
 | **Valve's Mesa and gamescope** | Source index `https://holo-packages.steamos.cloud/archlinux-deckard-hotfixes/source/` (`deckard-mesa-*-<ver>+git<sha>`, `gamescope-<ver>`, `deckard-steamvr-session-*`) | `VALVE_MESA_SHA`, `VALVE_GAMESCOPE_VER` (informational; they arrive inside Valve's rootfs) | n/a. A change triggers re-running gamescope tests and rebasing our patches |
 | **Mesa stable (Turnip)** | `https://gitlab.freedesktop.org/api/v4/projects/mesa%2Fmesa/repository/tags` (`mesa-X.Y.Z`) | `MESA_STABLE_TAG` | Yes → `mesa-stable` driver channel |
 | **Mesa main (Turnip)** | Mesa `main` HEAD, daily | `MESA_MAIN_SHA` | Yes → `turnip-main` driver channel (nightly) |
-| **Kernel** | Valve `linux-72-deckard-*` in the source index; Armbian `patch/kernel/archive/qcs6490-*`; kernel.org stable for the base | `KERNEL_BASE`, `ARMBIAN_REF` | No. Opens a PR; humans review patch rebases |
+| **Kernel** | Valve `linux-72-deckard-*` in the source index; Armbian `patch/kernel/archive/qcs6490-7.2` and `config/sources/families/qcs6490.conf` (edge tag, currently `v7.2.3`); Radxa `radxa/kernel` `linux-6.18.2`; kernel.org stable for the base | `KERNEL_BASE`, `ARMBIAN_REF` | No. Opens a PR; humans review patch rebases |
 | **Firmware** | `linux-firmware` tags; Radxa/meta-qcom Q6A firmware; AIC8800 driver | `LINUX_FIRMWARE_TAG`, `RADXA_FW_REF`, `AIC8800_REF` | Yes |
-| **Q6A SPI boot firmware** | Radxa releases / forum | `SPI_FW_MIN` | **Never auto-flashed.** Opens an issue; the OS shows a notice if the board's firmware is older than `SPI_FW_MIN` |
+| **Q6A SPI boot firmware** | Radxa's `edk2-qualcomm` package (`edk2-qcs6490` version in Armbian's apt `trixie-utils`); the forum thread JSON; Radxa's download page | `SPI_FW_MIN` | **Never auto-flashed.** Opens an issue; the OS shows a notice if the board's firmware is older than `SPI_FW_MIN` |
 | **Handheld project gamescope patches** | `hashtagbasit/SteamOS-ARM-Handhelds` `external-and-mods/gamescope` | `GS_MSM_REF` | No. Patches are reviewed before adoption |
 
 These endpoints were all reachable at the time of writing. The Valve stable manifest showed build `20261022.6150929`; Valve's source index showed `deckard-mesa-*-26.3.0_devel+gite07916b4`, `gamescope-3.16.30-4` and `linux-72-deckard-7.2.0+g152ecbcff010`.
@@ -49,7 +49,7 @@ How it works:
 - A channel is packaged as a **driver sysext** (`mesa-<channel>.raw`) that overlays Valve's Mesa files. Switching channel in settings (a Decky plugin and a `q6a-driver` CLI) swaps the sysext and restarts the session. No reflash, and the base image stays the tested one.
 - **Automatic fallback.** After a switch, if gamescope doesn't reach "ready" or the GPU hangs within the first few minutes, the device drops back to `valve` and records why.
 - Each CI build of the OS also runs the hardware tests against `mesa-stable`, and `turnip-main` nightly, so a broken driver never reaches the default channel.
-- **OEM drivers.** Qualcomm's proprietary Adreno driver for QCS6490 (Qualcomm Linux) runs on the downstream **KGSL** kernel driver, not the mainline display driver gamescope relies on, so it's out of scope. Radxa's OEM contributions (kernel patches, DT, firmware) flow in through the kernel and firmware rows above.
+- **OEM drivers.** Qualcomm's proprietary Adreno driver for QCS6490 (Qualcomm Linux) uses the **KGSL** kernel module. KGSL is now an out-of-tree module that works with the upstream device tree, so the kernel side could be made to fit. But Qualcomm's own docs list the userspace as **Vulkan 1.1 + OpenGL ES only**. Proton's DXVK/VKD3D need Vulkan 1.3, desktop OpenGL games need desktop GL, and FEX needs x86 driver builds. So it's out of scope. Turnip is the only driver that fits. Radxa's OEM contributions (kernel patches, DT, firmware) flow in through the kernel and firmware rows above.
 
 ## 4. Pipeline
 

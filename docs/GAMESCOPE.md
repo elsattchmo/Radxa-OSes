@@ -71,7 +71,7 @@ On the Frame's Adreno 750 the composite cost doesn't matter. On the Adreno 643, 
 
 Our defaults:
 
-- **Output 1080p60 by default, even on a 4K TV**, and let the TV scale. The A643 can't render most games at 4K. A 4K composite touches 4× the pixels, and 4K needs the double-pipe plane setup. 1440p and 4K output stay available in settings for desktop use, streaming and video.
+- **Output 1080p60 by default, even on a 4K TV**, and let the TV scale. The A643 can't render most games at 4K. A 4K composite touches 4× the pixels, and 4K needs the double-pipe plane setup. Qualcomm rates the QCS6490's DisplayPort output, which feeds the Q6A's HDMI bridge, at **4K 30 fps** (two lanes at HBR3). So 4K output is a 30 Hz desktop/video mode, not a gaming mode. **1080p120** fits the link; 1440p120 doesn't.
 - **Render games at 720p–1080p.** At 1080p output a 1080p game scans out directly. Lower resolutions use gamescope's upscaler; SGSR is the default and FSR/NIS/integer are selectable in the QAM. Upscaling always composites, but then it's buying something.
 - **Composite only when needed:** upscaling, Steam overlay or notifications visible, colour sliders or night mode active, or a hardware-scaling glitch (see G4).
 - **Measure, don't guess.** Valve's Mesa is built with Perfetto support, so gamescope's composite cost on Turnip can be measured per frame. Every default above is validated with numbers in the acceptance tests below.
@@ -121,7 +121,7 @@ All of these ship in our device layer. No rootfs files are edited.
 
 ## 7. Acceptance tests
 
-These run in Phase 0 against the Frame rootfs (inside `systemd-nspawn` with `/dev/dri`) on the Armbian 7.1 kernel, and again on every release.
+These run in Phase 0 against the Frame rootfs (inside `systemd-nspawn` with `/dev/dri`) on the Armbian edge kernel (mainline 7.2), and again on every release.
 
 | ID | Test | Pass |
 |---|---|---|
@@ -130,7 +130,7 @@ These run in Phase 0 against the Frame rootfs (inside `systemd-nspawn` with `/de
 | G2 | Direct scanout | A fullscreen 1080p game at 1080p output with the overlay hidden: zero composites per frame (gamescope stats/debug HUD) |
 | G3 | UBWC vs linear | No corruption with modifiers on; if it's clean, measure the bandwidth/FPS gain. Otherwise, linear only with a bug filed upstream |
 | G4 | VIG hardware scaling (720p → 1080p) | No flicker; otherwise force a composite when scaling, as the ports' patch does |
-| G5 | 4K output | Mode set works; desktop and video playback smooth; composite cost measured |
+| G5 | 4K output (expected max 4K30, per Qualcomm's DP spec) and 1080p120 | Modes set; confirm whether the RA620 bridge allows anything beyond 4K30; composite cost measured |
 | G6 | Hotplug and TV power cycle; boot with TV off | Session survives and recovers the picture; Remote Play host still reachable |
 | G7 | Screenshots, game recording, Remote Play host | Files and stream produced. Encoding uses the Iris hardware encoder (V4L2 → VA-API shim) where possible |
 | G8 | Frame pacing | 60/40/30 fps caps on 60 Hz are even (frametime plot); GPU composite cost recorded with Perfetto |

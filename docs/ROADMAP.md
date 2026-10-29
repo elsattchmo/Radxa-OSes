@@ -61,7 +61,7 @@ This replaces the phase order in [PLAN.md](PLAN.md) §8. The research in PLAN.md
 ### Dropped
 
 - CPU and RAM overclocking. The limits are locked in signed Qualcomm firmware (PLAN.md §7).
-- Qualcomm's proprietary Adreno driver. It needs Qualcomm's downstream KGSL kernel and can't coexist with the mainline display driver that gamescope uses (UPDATES.md §3).
+- Qualcomm's proprietary Adreno driver. It only offers Vulkan 1.1 and OpenGL ES, but Proton's DXVK/VKD3D need Vulkan 1.3, and gamescope and desktop OpenGL games need more (UPDATES.md §3).
 
 ## What to do first
 
@@ -81,7 +81,7 @@ This replaces the phase order in [PLAN.md](PLAN.md) §8. The research in PLAN.md
 
 This decides whether the project goes ahead, so it comes before any image building. Each step builds on the previous one:
 
-1. Flash the latest Radxa SPI firmware, **`wp_260916`**, from a host PC in EDL mode ([FIRMWARE.md](FIRMWARE.md)). Record `MemTotal`; that firmware reserves about 320 MiB more than the older Linux-only one. Install **Armbian `qcs6490` edge (mainline 7.1)** to the NVMe.
+1. Flash the latest Radxa SPI firmware, **`wp_260916`**, from a host PC in EDL mode ([FIRMWARE.md](FIRMWARE.md)). Record `MemTotal`; that firmware reserves about 320 MiB more than the older Linux-only one. Install **Armbian `qcs6490` edge (mainline 7.2)** to the NVMe.
 2. Confirm HDMI, Ethernet, `vulkaninfo` and `vkcube` on Turnip (Adreno 643).
 3. Download and verify Valve's current Frame rootfs on the board: signed RAUC bundle, then casync chunks, then sha256 check.
 4. `systemd-nspawn` into it with `/dev/dri`, input and the seat passed through. Run **Valve's own gamescope `--backend drm`** with `vkcube` on HDMI (G0).

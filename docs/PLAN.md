@@ -66,7 +66,7 @@ The bundle (about 2 MB) contains `manifest.raucm` (`compatible=steamos-aarch64`,
 
 | Frame feature | On Q6A | Notes |
 |---|---|---|
-| Game Mode (gamescope + Steam gamepad UI, QAM) | ✅ planned | Gamescope switched from the VR backend to DRM/KMS on HDMI. 1080p output by default, 1440p/4K optional; SGSR/FSR/NIS upscaling. No HDR/VRR (the Frame has neither in flat mode). See [GAMESCOPE.md](GAMESCOPE.md) |
+| Game Mode (gamescope + Steam gamepad UI, QAM) | ✅ planned | Gamescope switched from the VR backend to DRM/KMS on HDMI. 1080p output by default, 1080p120 where the TV allows, 4K only at 30 Hz (SoC DP limit); SGSR/FSR/NIS upscaling. No HDR/VRR (the Frame has neither in flat mode). See [GAMESCOPE.md](GAMESCOPE.md) |
 | Desktop Mode (KDE Plasma) | ✅ planned | On the Frame it's nested in gamescope as a VR overlay. Here: native KWin Wayland on KMS, as on the Deck |
 | Native arm64 Steam client | ✅ | Comes with the image |
 | x86/x64 Linux and Windows games (FEX + Proton ARM64EC) | ✅ planned | Works, but slow (see section 9) |
@@ -129,7 +129,7 @@ Fallback design (used by the handheld ports): unpack Valve's rootfs, bake in ker
 
 **Base:** Valve's `deckard-linux` `sm8650-7.2` tree, from Valve's GPL source tarballs at `holo-packages.steamos.cloud/archlinux-deckard-hotfixes/source/`.
 
-This is mainline 7.2 plus Valve's patches, which is what the userspace was built and tested against: scheduler tweaks, ntsync, and whatever FEX/Proton rely on. On top of it, forward-port the Armbian `qcs6490-7.1` patch set:
+This is mainline 7.2 plus Valve's patches, which is what the userspace was built and tested against: scheduler tweaks, ntsync, and whatever FEX/Proton rely on. On top of it, apply Armbian's `qcs6490-7.2` patch set. Armbian's `edge` kernel is now mainline **v7.2.3 + 20 Q6A patches**, the same major version as Valve's tree, so this is a rebase rather than a forward-port. It includes:
 
 - USB3 + DP-lane routing to the RA620 HDMI bridge
 - DP voltage-swing cap for the RA620
@@ -137,8 +137,10 @@ This is mainline 7.2 plus Valve's patches, which is what the userspace was built
 - DP audio fix
 - UFS PHY init fix
 - CDSP firmware path
+- DP HPD replug handling
+- the TrustZone SPI-flash driver (`qcom_scm_storage`) and the EFI-variable allowlist entry the current Radxa firmware needs ([FIRMWARE.md §7](FIRMWARE.md#7-armbian-findings))
 
-**Fallback:** a plain mainline 7.1/7.2 kernel with the Armbian patches. If something in userspace turns out to need a Valve kernel patch, we cherry-pick it.
+**Fallback:** a plain mainline 7.2 kernel with the Armbian patches. If something in userspace turns out to need a Valve kernel patch, we cherry-pick it.
 
 **Config fragment** (`kernel/q6a.config`):
 
@@ -255,7 +257,7 @@ The phases are sequential. Each has an exit criterion; don't start the next unti
 
 | # | Check | Pass criterion |
 |---|---|---|
-| 0.1 | Update SPI firmware; boot Armbian `qcs6490` edge (7.1) from NVMe | HDMI, USB3, Ethernet, Wi-Fi up from NVMe |
+| 0.1 | Update SPI firmware; boot Armbian `qcs6490` edge (mainline 7.2) from NVMe | HDMI, USB3, Ethernet, Wi-Fi up from NVMe |
 | 0.2 | `vulkaninfo` / `vkcube` / `vkmark` on upstream Turnip | A643 enumerated, no GPU hangs |
 | 0.3 | Download + verify Valve's rootfs (reuse `extract_rootfs.py`) on the Q6A | sha256 matches signed manifest |
 | 0.4 | `systemd-nspawn` into Valve's rootfs on the Armbian kernel, bind `/dev/dri`; run Valve's `vulkaninfo`, `FEXInterpreter` on an x86_64 test binary, the Steam client's `--version` | No SIGILL (no Armv9-only code); Valve's Turnip drives A643 |
